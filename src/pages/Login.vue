@@ -16,9 +16,10 @@
       >
         <q-input
           v-model="input.value"
-          :type="hidden ? 'password' : 'text'"
+          :type="isPwd ? 'password' : 'text'"
           :id="`passphrase-${i}`"
           outlined
+          dense
           placeholder="__________"
           @keydown="(e) => backspace(e, i)"
           @keyup.enter="signin"
@@ -33,7 +34,7 @@
           class="q-mb-sm"
         >
           <template v-slot:prepend>
-            <span>{{ i + 1 }}</span>
+            <span class="text-caption">{{ i + 1 }}</span>
           </template>
           <template v-slot:append>
             <q-icon
