@@ -2,7 +2,7 @@
   <div class="q-page q-pb-md">
     <div class="row">
       <div class="col-3">
-        <div class="row text-grey-8 q-pa-sm">
+        <div class="row text-grey-7 q-pa-sm">
           <div class="col">Price ({{ buyToken }})</div>
           <div class="col text-right">Total ({{ sellToken }}) {{ tab }}</div>
         </div>
@@ -53,7 +53,7 @@
                   </q-tooltip>
                 </q-btn>
               </div>
-              <div class="col text-grey-8 q-my-auto text-right">1280 LSK</div>
+              <div class="col text-grey-7 q-my-auto text-right">1280 LSK</div>
             </div>
             <div class="row q-gutter-md">
               <div class="col">
@@ -91,7 +91,7 @@
                   </q-tooltip>
                 </q-btn>
               </div>
-              <div class="col text-grey-8 q-my-auto text-right">1280 LSH</div>
+              <div class="col text-grey-7 q-my-auto text-right">1280 LSH</div>
             </div>
             <div class="row q-gutter-md">
               <div class="col">
