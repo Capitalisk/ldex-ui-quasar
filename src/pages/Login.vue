@@ -1,6 +1,6 @@
 <template>
-  <div class="flex window-height items-center">
-    <div class="row q-mx-xl q-col-gutter-x-lg">
+  <div class="flex items-center">
+    <div class="row q-pa-xl q-col-gutter-x-lg">
       <div class="col-12">
         <q-select
           :options="markets"
