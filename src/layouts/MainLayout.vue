@@ -19,24 +19,12 @@
   </q-layout>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue';
-import { useStore } from 'vuex';
+<script setup>
 import { useQuasar } from 'quasar';
+import { ref } from 'vue';
 
-// import Trader from '../components/Trader';
+const $q = useQuasar();
+$q.dark.set(true); // or false or "auto"
 
-export default defineComponent({
-  name: 'MainLayout',
-
-  // components: { Trader },
-  setup() {
-    const $q = useQuasar();
-    $q.dark.set(true); // or false or "auto"
-
-    return {
-      tab: ref('LSH'),
-    };
-  },
-});
+const tab = ref('LSH');
 </script>

@@ -10,7 +10,7 @@
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { configure } = require('quasar/wrappers');
 
-module.exports = configure(function (/* ctx */) {
+module.exports = configure(function (ctx) {
   return {
     // https://quasar.dev/quasar-cli/supporting-ts
     supportTS: false,
@@ -29,7 +29,7 @@ module.exports = configure(function (/* ctx */) {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      // 'mdi-v5',
+      'mdi-v5',
       // 'fontawesome-v5',
       // 'eva-icons',
       // 'themify',
@@ -70,13 +70,33 @@ module.exports = configure(function (/* ctx */) {
           },
         ]);
       },
+
+      // chainWebpack(chain) {
+      //   chain.resolve.modules({ fallback: { fs: false } });
+      // },
+
+      extendWebpack(config, { isServer, isClient }) {
+        if (!config.resolve.fallback) config.resolve.fallback = {};
+        // config.resolve.fallback.fs = false;
+        // config.resolve.fallback.os = false;
+        // config.resolve.fallback.path = false;
+        // config.resolve.fallback.url = false;
+        // config.resolve.fallback.stream = false;
+        // config.resolve.fallback.crypto = false;
+        // if (!config.output) config.output = {};
+        // config.output.libraryTarget = 'umd';
+        config.module
+        config.modules = ['node_modules', paths.appNodeModules].concat(
+          modules.additionalModulePaths || []
+        ),
+      },
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
       https: false,
       port: 8080,
-      open: true, // opens browser window automatically
+      open: false, // opens browser window automatically
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
