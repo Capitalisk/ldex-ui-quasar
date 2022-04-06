@@ -43,6 +43,7 @@ const state = reactive({
   keys: {},
   assetAdapters: {},
   isLoadingWallet: {},
+  activeTab: '',
 });
 
 const store = {
@@ -51,7 +52,10 @@ const store = {
   getAsset: (n) => state.config?.assets[n],
   marketNames: computed(() => Object.keys(state.config.markets)),
   getMarket: (m) => computed(() => state.config?.markets[m]),
+  changeTab: (t) => (state.activeTab = t),
 };
+
+state.activeTab = store.marketNames.value[0];
 
 for (const a of store.assetNames.value) {
   const { adapter } = store.getAsset(a);

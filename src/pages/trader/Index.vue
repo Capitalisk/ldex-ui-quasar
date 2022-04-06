@@ -3,8 +3,8 @@
     <div class="row">
       <div class="col-3">
         <div class="row text-grey-8 q-pa-sm">
-          <div class="col">Price (LSK)</div>
-          <div class="col text-right">Total (LSH)</div>
+          <div class="col">Price ({{ buyToken }})</div>
+          <div class="col text-right">Total ({{ sellToken }}) {{ tab }}</div>
         </div>
         <div
           class="row text-red q-px-sm"
@@ -16,7 +16,7 @@
         </div>
         <div class="row text-red q-py-md q-px-sm">
           <div class="col">
-            <h5>{{ currentPrice }} LSK</h5>
+            <h5>{{ currentPrice }} {{ buyToken }}</h5>
           </div>
         </div>
         <div
@@ -41,15 +41,16 @@
           <div class="col">
             <div class="row q-py-md">
               <div class="col">
-                <strong>Buy LSH</strong>
+                <strong>Buy {{ buyToken }}</strong>
                 <q-btn label="&#8505;" rounded color="primary" class="q-ml-sm">
                   <q-tooltip
                     anchor="center right"
                     self="center left"
                     :offset="[10, 10]"
-                    >The BUY panel lets you convert your {{ tab }} into
-                    LSK.</q-tooltip
                   >
+                    The BUY panel lets you convert your
+                    {{ buyToken }} into {{ sellToken }}.
+                  </q-tooltip>
                 </q-btn>
               </div>
               <div class="col text-grey-8 q-my-auto text-right">1280 LSK</div>
@@ -78,14 +79,15 @@
           <div class="col">
             <div class="row q-py-md">
               <div class="col">
-                <strong>Sell LSH</strong>
+                <strong>Sell {{ sellToken }}</strong>
                 <q-btn label="&#8505;" rounded color="primary" class="q-ml-sm">
                   <q-tooltip
                     anchor="center right"
                     self="center left"
                     :offset="[10, 10]"
                   >
-                    The SELL panel lets you convert your {{ tab }} into LSK.
+                    The SELL panel lets you convert your
+                    {{ sellToken }} into {{ buyToken }}.
                   </q-tooltip>
                 </q-btn>
               </div>
@@ -118,9 +120,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue';
 import { useQuasar } from 'quasar';
+import { api } from 'src/boot/axios';
+import { useStore } from 'src/store';
 
+const store = useStore();
 const $q = useQuasar();
 
 const buyingOffers = ref([]);
@@ -184,9 +190,12 @@ api
     console.error(err);
     $q.notify({ message: err.message, color: 'red' });
   });
+
 const marketTab = ref('limit');
 const text = ref('4033');
-const tab = ref('LSH');
+const tab = computed(() => store.state.activeTab);
+const buyToken = computed(() => tab.value.split('/')[0].toUpperCase());
+const sellToken = computed(() => tab.value.split('/')[1].toUpperCase());
 </script>
 
 <style lang="scss" scoped>

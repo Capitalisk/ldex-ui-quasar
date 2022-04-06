@@ -4,9 +4,14 @@
       <q-toolbar>
         <q-toolbar-title>LDEX</q-toolbar-title>
 
-        <q-btn icon="mdi-account" flat round @click="$router.push('/login')" />
+        <q-btn icon="mdi-account" flat round @click="$router.push('/')" />
       </q-toolbar>
-      <q-tabs align="left" class="bg-grey-9" v-model="tab">
+      <q-tabs
+        align="left"
+        class="bg-grey-9"
+        :model-value="tab"
+        @update:model-value="changeTab"
+      >
         <div class="q-px-md text-grey-8">Markets:</div>
         <template v-for="tab in tabOptions" :key="tab">
           <q-tab :name="tab" class="text-primary" :label="tab" />
@@ -21,16 +26,14 @@
 </template>
 
 <script setup>
-import { useQuasar } from 'quasar';
 import { useStore } from 'src/store';
 import { ref, computed } from 'vue';
 
 const store = useStore();
 
-const $q = useQuasar();
-$q.dark.set(true); // or false or "auto"
-
 const tabOptions = computed(() => store.marketNames.value);
 
-const tab = ref(tabOptions.value[0]);
+const tab = computed(() => store.state.activeTab);
+
+const changeTab = store.changeTab;
 </script>

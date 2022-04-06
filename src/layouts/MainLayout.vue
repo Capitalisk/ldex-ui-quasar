@@ -1,18 +1,25 @@
-
 <template>
   <q-layout view="hHh lpR fFf">
-
     <q-page-container>
       <router-view />
     </q-page-container>
-
   </q-layout>
 </template>
 
-<script setup>
+<script setup></script>
 
-</script>
+<style lang="scss">
+@import '../css/quasar.variables.scss';
 
-<style lang="scss" scoped>
+body,
+html {
+  // background: radial-gradient(
+  //   circle,
+  //   rgba(40, 208, 43, 1) 0%,
+  //   rgba(61, 222, 58, 1) 45%,
+  //   rgba(118, 255, 214, 1) 100%
+  // ) !important;
 
+  background: linear-gradient(135deg, $grey-8 0%, $grey-9 100%) !important;
+}
 </style>

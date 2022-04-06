@@ -1,29 +1,52 @@
 <template>
-  <div v-for="(input, i) in inputs" :key="i">
-    <q-input
-      :prefix="`${i + 1}`"
-      v-model="input.vlaue"
-      :type="hidden ? 'password' : 'text'"
-      :id="`passphrase-${i}`"
-      placeholder="__________"
-      @keydown="(e) => backspace(e, i)"
-      @keyup.enter="signin"
-      @focus="() => !pasting && (input = '')"
-      :rules="[(val) => !!val || (val && val.length <= 0) || 'Required']"
-      :ref="
-        (el) => {
-          if (el) inputRefs[i] = el;
-        }
-      "
-      hide-validation
-    />
+  <div class="flex window-height items-center">
+    <div class="row q-mx-xl q-col-gutter-x-md">
+      <div class="col-12">
+        <q-select :options="markets" :model-value="markets[0]" outlined class="q-mb-md" />
+      </div>
+      <div
+        v-for="(input, i) in inputs"
+        :key="i"
+        class="col-sm-12 col-md-6 col-lg-3"
+      >
+        <q-input
+          :prefix="`${i + 1}`"
+          v-model="input.value"
+          :type="hidden ? 'password' : 'text'"
+          :id="`passphrase-${i}`"
+          outlined
+          style="min-width: 300px"
+          placeholder="__________"
+          @keydown="(e) => backspace(e, i)"
+          @keyup.enter="signin"
+          @focus="() => !pasting && (input = '')"
+          :rules="[(val) => !!val || (val && val.length <= 0) || 'Required']"
+          :ref="
+            (el) => {
+              if (el) inputRefs[i] = el;
+            }
+          "
+          hide-validation
+        />
+      </div>
+      <div class="col-12 flex justify-center q-gutter-sm">
+        <q-btn label="Login" color="primary" />
+        <CreateWallet />
+      </div>
+    </div>
   </div>
-  <CreateWallet />
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
+
+import { useStore } from 'src/store';
+
 import CreateWallet from 'src/components/CreateWallet.vue';
-import { ref } from 'vue';
+
+const store = useStore();
+
+const markets = computed(() => store.marketNames.value);
 
 const inputs = ref(new Array(12));
 const hidden = ref(false);

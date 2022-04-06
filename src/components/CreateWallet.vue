@@ -1,5 +1,5 @@
 <template>
-  <q-btn label="Create wallet" @click="createWallet" />
+  <q-btn label="Create wallet" @click="createWallet" color="secondary" outline />
 </template>
 
 <script setup>
