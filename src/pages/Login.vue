@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center ldex-login">
     <div class="row q-pa-xl q-col-gutter-x-lg">
       <div class="col-12">
         <q-select
@@ -15,7 +15,6 @@
         class="col-xs-12 col-sm-6 col-lg-3"
       >
         <q-input
-          :prefix="`${i + 1}`"
           v-model="input.value"
           :type="hidden ? 'password' : 'text'"
           :id="`passphrase-${i}`"
@@ -32,7 +31,18 @@
           "
           hide-validation
           class="q-mb-sm"
-        />
+        >
+          <template v-slot:prepend>
+            <span>{{ i + 1 }}</span>
+          </template>
+          <template v-slot:append>
+            <q-icon
+              :name="isPwd ? 'visibility_off' : 'visibility'"
+              class="cursor-pointer"
+              @click="isPwd = !isPwd"
+            />
+          </template>
+        </q-input>
       </div>
       <div class="col-12 flex justify-center q-gutter-sm">
         <q-btn label="Login" color="primary" />
@@ -55,6 +65,7 @@ const markets = computed(() => store.marketNames.value);
 
 const inputs = ref(new Array(12));
 const hidden = ref(false);
+const isPwd = ref(true);
 
 const inputRefs = ref([]);
 
@@ -75,4 +86,8 @@ const backspace = (e, i) => {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.ldex-login {
+  min-height: 100vh;
+}
+</style>
