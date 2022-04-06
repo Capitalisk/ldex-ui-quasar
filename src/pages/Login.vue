@@ -1,8 +1,13 @@
 <template>
   <div class="flex window-height items-center">
-    <div class="row q-mx-xl q-col-gutter-x-md">
+    <div class="row q-mx-xl q-col-gutter-x-lg">
       <div class="col-12">
-        <q-select :options="markets" :model-value="markets[0]" outlined class="q-mb-md" />
+        <q-select
+          :options="markets"
+          :model-value="markets[0]"
+          outlined
+          class="q-mb-lg"
+        />
       </div>
       <div
         v-for="(input, i) in inputs"
@@ -27,6 +32,7 @@
             }
           "
           hide-validation
+          class="q-mb-sm"
         />
       </div>
       <div class="col-12 flex justify-center q-gutter-sm">
