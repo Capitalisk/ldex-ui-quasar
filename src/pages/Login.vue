@@ -12,7 +12,7 @@
       <div
         v-for="(input, i) in inputs"
         :key="i"
-        class="col-sm-12 col-md-6 col-lg-3"
+        class="col-xs-12 col-sm-6 col-lg-3"
       >
         <q-input
           :prefix="`${i + 1}`"
@@ -20,7 +20,6 @@
           :type="hidden ? 'password' : 'text'"
           :id="`passphrase-${i}`"
           outlined
-          style="min-width: 300px"
           placeholder="__________"
           @keydown="(e) => backspace(e, i)"
           @keyup.enter="signin"
