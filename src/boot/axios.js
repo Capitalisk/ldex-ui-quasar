@@ -1,7 +1,7 @@
 import { boot } from 'quasar/wrappers';
 import axios from 'axios';
 
-const api = axios.create({ baseURL: 'https://ldex.exchange/dex/lsh-lsk/api' });
+let api = axios.create({ baseURL: 'http://45.76.175.50:8021' });
 
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
@@ -14,11 +14,8 @@ export default boot(({ app }) => {
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
 
-  app.config.globalProperties.getOrderBook = async (
-    instance,
-    orderBookDepth,
-  ) => {
-    const { data: orderBook } = await instance.get(
+  app.config.globalProperties.getOrderBook = async (orderBookDepth) => {
+    const { data: orderBook } = await api.get(
       `/order-book?depth=${orderBookDepth}`,
     );
     return orderBook.map((orderLvl) => {
@@ -36,11 +33,10 @@ export default boot(({ app }) => {
   };
 
   app.config.globalProperties.getBidsFromWallet = async (
-    instance,
     sourceWalletAddress,
   ) => {
     return (
-      await instance.get(
+      await api.get(
         `/orders/bids?sourceWalletAddress=${encodeURIComponent(
           sourceWalletAddress,
         )}`,
@@ -49,11 +45,10 @@ export default boot(({ app }) => {
   };
 
   app.config.globalProperties.getAsksFromWallet = async (
-    instance,
     sourceWalletAddress,
   ) => {
     return (
-      await instance.get(
+      await api.get(
         `/orders/asks?sourceWalletAddress=${encodeURIComponent(
           sourceWalletAddress,
         )}`,
@@ -62,12 +57,11 @@ export default boot(({ app }) => {
   };
 
   app.config.globalProperties.getPendingTransfers = async (
-    instance,
     targetAssetSymbol,
     recipientAddress,
   ) => {
     return (
-      await instance.get(
+      await api.get(
         `/transfers/pending?targetChain=${targetAssetSymbol}&recipientId=${encodeURIComponent(
           recipientAddress,
         )}`,
@@ -75,40 +69,29 @@ export default boot(({ app }) => {
     ).data;
   };
 
-  app.config.globalProperties.getRecentTransfers = async (
-    instance,
-    orderId,
-  ) => {
+  app.config.globalProperties.getRecentTransfers = async (orderId) => {
     let [takerResult, makerResult, originResult] = await Promise.all([
-      instance.get(
-        `/transfers/recent?takerOrderId=${encodeURIComponent(orderId)}`,
-      ),
-      instance.get(
-        `/transfers/recent?makerOrderId=${encodeURIComponent(orderId)}`,
-      ),
-      instance.get(
-        `/transfers/recent?originOrderId=${encodeURIComponent(orderId)}`,
-      ),
+      api.get(`/transfers/recent?takerOrderId=${encodeURIComponent(orderId)}`),
+      api.get(`/transfers/recent?makerOrderId=${encodeURIComponent(orderId)}`),
+      api.get(`/transfers/recent?originOrderId=${encodeURIComponent(orderId)}`),
     ]);
     return [...takerResult.data, ...makerResult.data, ...originResult.data];
   };
 
-  app.config.globalProperties.getProcessedHeights = async (instance) => {
-    const status = (await instance.get('/status')).data;
+  app.config.globalProperties.getProcessedHeights = async (api) => {
+    const status = (await api.get('/status')).data;
     return status.processedHeights;
   };
 
-  app.config.globalProperties.getPriceHistory = async (
-    instance,
-    offset,
-    limit,
-  ) => {
-    return (await instance.get('/prices/recent')).data;
+  app.config.globalProperties.getPriceHistory = async (offset, limit) => {
+    return (await api.get('/prices/recent')).data;
   };
 
-  app.config.globalProperties.getConfig = async (instance) => {
-    return await instance.get(`.env.${process.env.NODE_ENV}.json`);
+  app.config.globalProperties.getConfig = async (api) => {
+    return await api.get(`.env.${process.env.NODE_ENV}.json`);
   };
 });
 
-export { axios, api };
+const changeBaseURL = (baseURL) => (api.defaults.baseURL = baseURL);
+
+export { axios, api, changeBaseURL };

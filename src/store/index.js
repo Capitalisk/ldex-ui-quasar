@@ -4,7 +4,8 @@ import LiskV3Adapter from 'ldex-ui-lisk-v3-adapter';
 import LiskAdapter from 'ldex-ui-lisk-adapter';
 import LDPoSAdapter from 'ldex-ui-ldpos-adapter';
 
-import config from '../../.env.development.json';
+import config from '../../.env.production.json';
+import { changeBaseURL } from 'src/boot/axios';
 
 export const adapters = {
   lisk3: LiskV3Adapter,
@@ -49,16 +50,18 @@ const state = reactive({
 const store = {
   state: readonly(state),
   assetNames: computed(() => Object.keys(state.config.assets)),
-  getAsset: (n) => state.config?.assets[n],
   marketNames: computed(() => Object.keys(state.config.markets)),
-  getMarket: (m) => computed(() => state.config?.markets[m]),
-  changeTab: (t) => (state.activeTab = t),
+  changeTab: (t) => {
+    state.activeTab = t;
+    console.log(t);
+    changeBaseURL(state.config.markets[t].apiURL);
+  },
 };
 
 state.activeTab = store.marketNames.value[0];
 
 for (const a of store.assetNames.value) {
-  const { adapter } = store.getAsset(a);
+  const { adapter } = store.state.config.assets[a];
   const cfg = { chainSymbol: a, ...adapter };
   const AssetAdapter = adapters[adapter.type];
   if (!AssetAdapter) {

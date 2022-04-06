@@ -121,7 +121,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watchEffect } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useStore } from 'src/store';
@@ -133,63 +133,73 @@ const buyingOffers = ref([]);
 const sellingOffers = ref([]);
 const currentPrice = ref(null);
 const recentTransactions = ref({});
+const walletAddress = ref();
 
-api
-  .get('/order-book?depth=20')
-  .then(({ data }) => {
-    for (let i = 0; i < data.length; i++) {
-      const order = data[i];
-      if (order.side === 'ask') {
-        sellingOffers.value.push({
-          ...order,
-          sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
-            'en-US',
-          ),
-        });
-      } else {
-        buyingOffers.value.push({
-          ...order,
-          sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
-            'en-US',
-          ),
-        });
-      }
-    }
-  })
-  .catch((err) => $q.notify({ message: err.message, color: 'red' }));
+watchEffect(() => {
+  if (store.state.activeTab) {
+    sellingOffers.value = [];
+    buyingOffers.value = [];
 
-api
-  .get('/prices/recent')
-  .then(({ data }) => {
-    currentPrice.value = data[0].price;
-  })
-  .catch((err) => $q.notify({ message: err.message, color: 'red' }));
+    api
+      .get('/order-book?depth=20')
+      .then(({ data }) => {
+        for (let i = 0; i < data.length; i++) {
+          const order = data[i];
+          if (order.side === 'ask') {
+            sellingOffers.value.push({
+              ...order,
+              sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
+                'en-US',
+              ),
+            });
+          } else {
+            buyingOffers.value.push({
+              ...order,
+              sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
+                'en-US',
+              ),
+            });
+          }
+        }
+      })
+      .catch((err) => $q.notify({ message: err.message, color: 'red' }));
 
-api
-  .get('/status')
-  .then(({ data }) => {
-    const chains = Object.keys(data.chains);
-    for (let i = 0; i < chains.length; i++) {
-      const chain = chains[i];
-      const token = data.chains[chain];
+    api
+      .get('/prices/recent')
+      .then(({ data }) => {
+        currentPrice.value = data[0].price;
+      })
+      .catch((err) => $q.notify({ message: err.message, color: 'red' }));
+
+    if (walletAddress.value) {
       api
-        .get(
-          `https://ldex.exchange/chain/lsh/api/transactions?senderId=${token.walletAddress}&limit=100&sort=timestamp:desc`,
-        )
-        .then(({ data: d }) => {
-          console.log(d);
-          recentTransactions.value[chain] = d;
+        .get('/status')
+        .then(({ data }) => {
+          const chains = Object.keys(data.chains);
+          for (let i = 0; i < chains.length; i++) {
+            const chain = chains[i];
+            const token = data.chains[chain];
+            api
+              .get(
+                `https://ldex.exchange/chain/lsh/api/transactions?senderId=${token.walletAddress}&limit=100&sort=timestamp:desc`,
+              )
+              .then(({ data: d }) => {
+                console.log(d);
+                recentTransactions.value[chain] = d;
+              })
+              .catch((err) => {
+                console.error(err);
+                $q.notify({ message: err.message, color: 'red' });
+              });
+          }
         })
         .catch((err) => {
           console.error(err);
           $q.notify({ message: err.message, color: 'red' });
         });
     }
-  })
-  .catch((err) => {
-    console.error(err);
-    $q.notify({ message: err.message, color: 'red' });
-  });
+  }
+});
 
 const marketTab = ref('limit');
 const text = ref('4033');
