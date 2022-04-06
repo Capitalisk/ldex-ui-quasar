@@ -8,6 +8,7 @@
 
 /* eslint-env node */
 const ESLintPlugin = require('eslint-webpack-plugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const { configure } = require('quasar/wrappers');
 
 module.exports = configure(function (ctx) {
@@ -29,7 +30,7 @@ module.exports = configure(function (ctx) {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      'mdi-v5',
+      'mdi-v6',
       // 'fontawesome-v5',
       // 'eva-icons',
       // 'themify',
@@ -69,6 +70,7 @@ module.exports = configure(function (ctx) {
             exclude: 'node_modules',
           },
         ]);
+        chain.plugin('node-polyfull-plugin').use(NodePolyfillPlugin, []);
       },
 
       // chainWebpack(chain) {
@@ -77,18 +79,9 @@ module.exports = configure(function (ctx) {
 
       extendWebpack(config, { isServer, isClient }) {
         if (!config.resolve.fallback) config.resolve.fallback = {};
-        // config.resolve.fallback.fs = false;
-        // config.resolve.fallback.os = false;
-        // config.resolve.fallback.path = false;
-        // config.resolve.fallback.url = false;
-        // config.resolve.fallback.stream = false;
-        // config.resolve.fallback.crypto = false;
-        // if (!config.output) config.output = {};
-        // config.output.libraryTarget = 'umd';
-        config.module
-        config.modules = ['node_modules', paths.appNodeModules].concat(
-          modules.additionalModulePaths || []
-        ),
+        config.resolve.fallback.fs = false;
+        config.resolve.fallback.os = false;
+        config.resolve.fallback.path = false;
       },
     },
 

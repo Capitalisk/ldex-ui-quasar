@@ -119,91 +119,74 @@
 </template>
 
 <script>
-import { axios, api } from 'boot/axios';
-import { defineComponent, ref } from 'vue';
 import { useQuasar } from 'quasar';
 
-export default defineComponent({
-  name: 'PageIndex',
-  // props: {
-  //   tab,
-  // },
-  setup() {
-    const $q = useQuasar();
+const $q = useQuasar();
 
-    const buyingOffers = ref([]);
-    const sellingOffers = ref([]);
-    const currentPrice = ref(null);
-    const recentTransactions = ref({});
+const buyingOffers = ref([]);
+const sellingOffers = ref([]);
+const currentPrice = ref(null);
+const recentTransactions = ref({});
 
-    api
-      .get('/order-book?depth=20')
-      .then(({ data }) => {
-        for (let i = 0; i < data.length; i++) {
-          const order = data[i];
-          if (order.side === 'ask') {
-            sellingOffers.value.push({
-              ...order,
-              sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
-                'en-US',
-              ),
-            });
-          } else {
-            buyingOffers.value.push({
-              ...order,
-              sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
-                'en-US',
-              ),
-            });
-          }
-        }
-      })
-      .catch((err) => $q.notify({ message: err.message, color: 'red' }));
+api
+  .get('/order-book?depth=20')
+  .then(({ data }) => {
+    for (let i = 0; i < data.length; i++) {
+      const order = data[i];
+      if (order.side === 'ask') {
+        sellingOffers.value.push({
+          ...order,
+          sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
+            'en-US',
+          ),
+        });
+      } else {
+        buyingOffers.value.push({
+          ...order,
+          sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
+            'en-US',
+          ),
+        });
+      }
+    }
+  })
+  .catch((err) => $q.notify({ message: err.message, color: 'red' }));
 
-    api
-      .get('/prices/recent')
-      .then(({ data }) => {
-        currentPrice.value = data[0].price;
-      })
-      .catch((err) => $q.notify({ message: err.message, color: 'red' }));
+api
+  .get('/prices/recent')
+  .then(({ data }) => {
+    currentPrice.value = data[0].price;
+  })
+  .catch((err) => $q.notify({ message: err.message, color: 'red' }));
 
-    api
-      .get('/status')
-      .then(({ data }) => {
-        const chains = Object.keys(data.chains);
-        for (let i = 0; i < chains.length; i++) {
-          const chain = chains[i];
-          const token = data.chains[chain];
-          api
-            .get(
-              `https://ldex.exchange/chain/lsh/api/transactions?senderId=${token.walletAddress}&limit=100&sort=timestamp:desc`,
-            )
-            .then(({ data: d }) => {
-              console.log(d);
-              recentTransactions.value[chain] = d;
-            })
-            .catch((err) => {
-              console.error(err);
-              $q.notify({ message: err.message, color: 'red' });
-            });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        $q.notify({ message: err.message, color: 'red' });
-      });
-
-    return {
-      buyingOffers,
-      sellingOffers,
-      currentPrice,
-      marketTab: ref('limit'),
-      text: ref('4033'),
-      tab: ref('LSH'),
-      recentTransactions,
-    };
-  },
-});
+api
+  .get('/status')
+  .then(({ data }) => {
+    const chains = Object.keys(data.chains);
+    for (let i = 0; i < chains.length; i++) {
+      const chain = chains[i];
+      const token = data.chains[chain];
+      api
+        .get(
+          `https://ldex.exchange/chain/lsh/api/transactions?senderId=${token.walletAddress}&limit=100&sort=timestamp:desc`,
+        )
+        .then(({ data: d }) => {
+          console.log(d);
+          recentTransactions.value[chain] = d;
+        })
+        .catch((err) => {
+          console.error(err);
+          $q.notify({ message: err.message, color: 'red' });
+        });
+    }
+  })
+  .catch((err) => {
+    console.error(err);
+    $q.notify({ message: err.message, color: 'red' });
+  });
+const marketTab = ref('limit');
+const text = ref('4033');
+const tab = ref('LSH');
 </script>
 
 <style lang="scss" scoped>

@@ -1,12 +1,14 @@
 import { reactive, readonly, computed } from 'vue';
 
 import LiskV3Adapter from 'ldex-ui-lisk-v3-adapter';
+import LiskAdapter from 'ldex-ui-lisk-adapter';
 import LDPoSAdapter from 'ldex-ui-ldpos-adapter';
 
 import config from '../../.env.development.json';
 
 export const adapters = {
   lisk3: LiskV3Adapter,
+  lisk: LiskAdapter,
   ldpos: LDPoSAdapter,
 };
 // TODO: Implement pending order
@@ -59,7 +61,7 @@ for (const a of store.assetNames.value) {
     throw new Error(`The ${adapter.type} adapter type is not supported`);
   }
   const assetAdapter = new AssetAdapter(cfg);
-  store.assetAdapters[asset] = assetAdapter;
+  state.assetAdapters[a] = assetAdapter;
 }
 
 export default store;

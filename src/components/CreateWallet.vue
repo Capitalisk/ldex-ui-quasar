@@ -4,6 +4,7 @@
 
 <script setup>
 import { useStore } from 'src/store';
+import { ref } from 'vue';
 
 const store = useStore();
 
@@ -11,14 +12,29 @@ const loading = ref({});
 
 const generatedWallet = ref(null);
 
+const getKeyIndex = async (asset, address) => {
+  if (!address) {
+    return '';
+  }
+  const assetAdapter = store.state.assetAdapters[asset];
+  if (!address.length || !assetAdapter.getAccountNextKeyIndex) {
+    return '';
+  }
+  let keyIndex;
+  try {
+    keyIndex = await assetAdapter.getAccountNextKeyIndex({ address });
+  } catch (error) {}
+  return keyIndex || 0;
+};
+
 const createWallet = async () => {
-  const asset = 'lsk';
-  const assetAdapter = store.assetAdapters[asset];
+  const asset = 'clsk';
+  const assetAdapter = store.state.assetAdapters[asset];
 
   loading.value[asset] = true;
 
   const { address, passphrase } = await assetAdapter.createWallet();
-  const keyIndex = await this.getKeyIndex(asset, address);
+  const keyIndex = await getKeyIndex(asset, address);
 
   loading.value[asset] = false;
 
