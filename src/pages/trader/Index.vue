@@ -139,6 +139,7 @@ watchEffect(() => {
   if (store.state.activeTab) {
     sellingOffers.value = [];
     buyingOffers.value = [];
+    currentPrice.value = null;
 
     api
       .get('/order-book?depth=20')
