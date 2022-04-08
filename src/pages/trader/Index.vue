@@ -1,33 +1,6 @@
 <template>
   <div class="q-page q-pb-md">
-    <div class="row">
-      <div class="col-3">
-        <div class="row text-grey-7 q-pa-sm">
-          <div class="col">Price ({{ buyToken }})</div>
-          <div class="col text-right">Total ({{ sellToken }}) {{ tab }}</div>
-        </div>
-        <div
-          class="row text-red q-px-sm"
-          v-for="{ price, sizeRemaining } in sellingOffers"
-          :key="price"
-        >
-          <div class="col">{{ price }}</div>
-          <div class="col text-right">{{ sizeRemaining }}</div>
-        </div>
-        <div class="row text-red q-py-md q-px-sm">
-          <div class="col">
-            <h5>{{ currentPrice }} {{ buyToken }}</h5>
-          </div>
-        </div>
-        <div
-          class="row text-green q-px-sm"
-          v-for="{ price, sizeRemaining } in buyingOffers"
-          :key="price"
-        >
-          <div class="col">{{ price }}</div>
-          <div class="col text-right">{{ sizeRemaining }}</div>
-        </div>
-      </div>
+    <div class="row" v-if="currentPrice">
       <div class="col">
         <div class="row q-pa-xl">{{ recentTransactions }}</div>
         <div class="row q-pa-md">
@@ -42,7 +15,13 @@
             <div class="row q-py-md">
               <div class="col">
                 <strong>Buy {{ buyToken }}</strong>
-                <q-btn label="&#8505;" rounded color="primary" class="q-ml-sm">
+                <q-btn
+                  label="&#8505;"
+                  size="sm"
+                  round
+                  color="primary"
+                  class="q-ml-sm"
+                >
                   <q-tooltip
                     anchor="center right"
                     self="center left"
@@ -80,7 +59,13 @@
             <div class="row q-py-md">
               <div class="col">
                 <strong>Sell {{ sellToken }}</strong>
-                <q-btn label="&#8505;" rounded color="primary" class="q-ml-sm">
+                <q-btn
+                  label="&#8505;"
+                  size="sm"
+                  round
+                  color="primary"
+                  class="q-ml-sm"
+                >
                   <q-tooltip
                     anchor="center right"
                     self="center left"
@@ -116,12 +101,86 @@
           </div>
         </div>
       </div>
+      <div class="col-3">
+        <div class="row text-grey-7 q-pa-sm">
+          <div class="col">
+            Price ({{ sellToken }})
+            <q-tooltip>The price {{ sellToken }} is being sold at</q-tooltip>
+          </div>
+          <div class="col text-right">
+            Amount ({{ buyToken }})
+            <q-tooltip>The amount of {{ buyToken }} being sold</q-tooltip>
+          </div>
+          <div class="col text-right">
+            Total ({{ buyToken }})
+            <q-tooltip>The total amount of {{ buyToken }} being sold</q-tooltip>
+          </div>
+        </div>
+        <div
+          class="row text-red q-px-sm"
+          v-for="{ price, sizeRemaining } in sellingOffers"
+          :key="price"
+          :style="`background: linear-gradient(to right, rgb(112, 13, 13) ${
+            (sizeRemaining / maxSize.ask) * 100
+          }%, rgba(0, 0, 0, 0) 1%);`"
+        >
+          <div class="col">{{ price }} {{ sellToken }}</div>
+          <div class="col text-right">{{ numberToDecimal(sizeRemaining) }}</div>
+          <div class="col text-right">
+            {{ numberToDecimal(sizeRemaining * price) }}
+          </div>
+        </div>
+        <div class="row text-red q-py-md q-px-sm">
+          <div class="col-5">
+            <h5 class="q-my-xs">1 {{ buyToken }}</h5>
+          </div>
+          <div class="col-1"><h5 class="q-my-xs">=</h5></div>
+          <div class="col-6 text-right">
+            <h5 class="q-my-xs">{{ currentPrice }} {{ sellToken }}</h5>
+          </div>
+        </div>
+        <div class="row text-grey-7 q-pa-sm">
+          <div
+            class="col"
+            style="border-color: rgb(40, 97, 19); border-top: 2px"
+          >
+            Price ({{ sellToken }})
+            <q-tooltip>The price {{ sellToken }} is being bought at</q-tooltip>
+          </div>
+          <div class="col text-right">
+            Amount ({{ sellToken }})
+            <q-tooltip>The amount of {{ sellToken }} being bought</q-tooltip>
+          </div>
+          <div class="col text-right">
+            Total ({{ sellToken }})
+            <q-tooltip
+              >The total amount of {{ sellToken }} being bought</q-tooltip
+            >
+          </div>
+        </div>
+        <div
+          class="row text-green q-px-sm"
+          v-for="{ price, valueRemaining } in buyingOffers"
+          :key="price"
+          :style="`background: linear-gradient(to right, rgb(40, 97, 19) ${
+            (valueRemaining / maxSize.bid) * 100
+          }%, rgba(0, 0, 0, 0) 1%);`"
+        >
+          <div class="col">{{ price }} {{ sellToken }}</div>
+          <div class="col text-right">
+            {{ numberToDecimal(valueRemaining) }}
+          </div>
+          <div class="col text-right">
+            {{ numberToDecimal(valueRemaining * price) }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watchEffect } from 'vue';
+import { ref, computed, watchEffect, reactive } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useStore } from 'src/store';
@@ -134,6 +193,10 @@ const sellingOffers = ref([]);
 const currentPrice = ref(null);
 const recentTransactions = ref({});
 const walletAddress = ref();
+const maxSize = reactive({
+  bid: 0,
+  ask: 0,
+});
 
 watchEffect(() => {
   if (store.state.activeTab) {
@@ -147,30 +210,33 @@ watchEffect(() => {
         for (let i = 0; i < data.length; i++) {
           const order = data[i];
           if (order.side === 'ask') {
-            sellingOffers.value.push({
-              ...order,
-              sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
-                'en-US',
-              ),
-            });
+            sellingOffers.value.push(order);
           } else {
-            buyingOffers.value.push({
-              ...order,
-              sizeRemaining: (order.sizeRemaining / 100000000).toLocaleString(
-                'en-US',
-              ),
-            });
+            buyingOffers.value.push(order);
           }
         }
+
+        maxSize.ask = Math.max(
+          ...sellingOffers.value.map((o) => parseInt(o.sizeRemaining)),
+        );
+        maxSize.bid = Math.max(
+          ...buyingOffers.value.map((o) => parseInt(o.valueRemaining)),
+        );
       })
-      .catch((err) => $q.notify({ message: err.message, color: 'red' }));
+      .catch((err) => {
+        console.error(err);
+        $q.notify({ message: err.message, color: 'red' });
+      });
 
     api
       .get('/prices/recent')
       .then(({ data }) => {
-        currentPrice.value = data[0].price;
+        currentPrice.value = data[0]?.price;
       })
-      .catch((err) => $q.notify({ message: err.message, color: 'red' }));
+      .catch((err) => {
+        console.error(err);
+        $q.notify({ message: err.message, color: 'red' });
+      });
 
     if (walletAddress.value) {
       api
@@ -207,6 +273,7 @@ const text = ref('4033');
 const tab = computed(() => store.state.activeTab);
 const buyToken = computed(() => tab.value.split('/')[0].toUpperCase());
 const sellToken = computed(() => tab.value.split('/')[1].toUpperCase());
+const numberToDecimal = (v) => (v / 100000000).toLocaleString('en-US');
 </script>
 
 <style lang="scss" scoped>
