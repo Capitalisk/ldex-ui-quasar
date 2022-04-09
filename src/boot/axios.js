@@ -1,7 +1,20 @@
 import { boot } from 'quasar/wrappers';
 import axios from 'axios';
+import store from 'src/store';
 
-let api = axios.create({ baseURL: 'http://45.76.175.50:8021' });
+let api = axios.create({
+  baseURL: 'http://45.76.175.50:8021',
+});
+
+api.interceptors.request.use((r) => {
+  store.mutateLoading(true);
+  return r;
+});
+
+api.interceptors.response.use((r) => {
+  store.mutateLoading(false);
+  return r;
+});
 
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api

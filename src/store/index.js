@@ -45,6 +45,7 @@ const state = reactive({
   assetAdapters: {},
   isLoadingWallet: {},
   activeTab: '',
+  loading: false,
 });
 
 const store = {
@@ -53,9 +54,9 @@ const store = {
   marketNames: computed(() => Object.keys(state.config.markets)),
   changeTab: (t) => {
     state.activeTab = t;
-    console.log(t);
     changeBaseURL(state.config.markets[t].apiURL);
   },
+  mutateLoading: (v) => (state.loading = v),
 };
 
 state.activeTab = store.marketNames.value[0];

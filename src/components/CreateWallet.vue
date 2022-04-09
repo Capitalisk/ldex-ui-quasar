@@ -1,5 +1,12 @@
 <template>
-  <q-btn label="Create wallet" @click="createWallet" color="secondary" outline />
+  <q-btn
+    label="Create wallet"
+    @click="createWallet"
+    color="secondary"
+    rounded
+    outline
+    class="q-px-lg"
+  />
 </template>
 
 <script setup>

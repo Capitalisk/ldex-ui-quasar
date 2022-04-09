@@ -1,6 +1,7 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <q-header class="bg-transparent">
+      <q-linear-progress dark query color="primary" track-color="primary" class="absolute" v-if="store.state.loading" />
       <q-toolbar>
         <q-toolbar-title>LDEX</q-toolbar-title>
 

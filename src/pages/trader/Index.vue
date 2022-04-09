@@ -2,7 +2,7 @@
   <div class="q-page q-pb-md">
     <div class="row" v-if="currentPrice">
       <div class="col">
-        <div class="row q-pa-xl">{{ recentTransactions }}</div>
+        <div class="row" ref="ldexChartRef"></div>
         <div class="row q-pa-md">
           <q-tabs v-model="marketTab">
             <q-tab name="limit">Limit</q-tab>
@@ -117,7 +117,7 @@
           </div>
         </div>
         <div
-          class="row text-red q-px-sm"
+          class="row text-red q-px-sm text-caption"
           v-for="{ price, sizeRemaining } in sellingOffers"
           :key="price"
           :style="`background: linear-gradient(to right, rgb(112, 13, 13) ${
@@ -131,12 +131,47 @@
           </div>
         </div>
         <div class="row text-red q-py-md q-px-sm">
-          <div class="col-5">
-            <h5 class="q-my-xs">1 {{ buyToken }}</h5>
+          <div class="col-4">
+            <h6 class="q-my-xs">1 {{ buyToken }}</h6>
           </div>
-          <div class="col-1"><h5 class="q-my-xs">=</h5></div>
-          <div class="col-6 text-right">
-            <h5 class="q-my-xs">{{ currentPrice }} {{ sellToken }}</h5>
+
+          <div class="col-8 text-right">
+            <q-btn
+              :label="`Connect ${buyToken}`"
+              icon-right="mdi-wallet"
+              rounded
+              outline
+              xs
+              dense
+              @click="wallets[buyToken] = true"
+              style="width: 175px"
+            >
+              <q-dialog v-model="wallets[buyToken]">
+                <Login :token="buyToken" />
+              </q-dialog>
+            </q-btn>
+          </div>
+          <div class="col-12">
+            <span class="q-ml-xl q-my-xs text-caption">=</span>
+          </div>
+          <div class="col-4">
+            <h6 class="q-my-xs">{{ currentPrice }} {{ sellToken }}</h6>
+          </div>
+          <div class="col-8 text-right">
+            <q-btn
+              :label="`Connect ${sellToken}`"
+              icon-right="mdi-wallet"
+              rounded
+              outline
+              xs
+              dense
+              @click="wallets[sellToken] = true"
+              style="width: 175px"
+            >
+              <q-dialog v-model="wallets[sellToken]">
+                <Login :token="sellToken" />
+              </q-dialog>
+            </q-btn>
           </div>
         </div>
         <div class="row text-grey-7 q-pa-sm">
@@ -159,7 +194,7 @@
           </div>
         </div>
         <div
-          class="row text-green q-px-sm"
+          class="row text-green q-px-sm text-caption"
           v-for="{ price, valueRemaining } in buyingOffers"
           :key="price"
           :style="`background: linear-gradient(to right, rgb(40, 97, 19) ${
@@ -175,15 +210,20 @@
           </div>
         </div>
       </div>
+      <div class="col-3"></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, reactive } from 'vue';
+import { ref, computed, watchEffect, reactive, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
+import { GoogleCharts } from 'google-charts';
+
 import { api } from 'src/boot/axios';
 import { useStore } from 'src/store';
+
+import Login from '../Login.vue';
 
 const store = useStore();
 const $q = useQuasar();
@@ -197,6 +237,10 @@ const maxSize = reactive({
   bid: 0,
   ask: 0,
 });
+const wallets = reactive({});
+const priceHistory = ref([]);
+
+const ldexChartRef = ref();
 
 watchEffect(() => {
   if (store.state.activeTab) {
@@ -232,6 +276,93 @@ watchEffect(() => {
       .get('/prices/recent')
       .then(({ data }) => {
         currentPrice.value = data[0]?.price;
+        priceHistory.value = data;
+
+        const chartData = data.map((e) => [e.baseTimestamp, e.price]);
+
+        //Load the charts library with a callback
+        GoogleCharts.load(drawChart);
+
+        // function drawChart() {
+        //   var data = new google.visualization.DataTable();
+        //   data.addColumn('number', 'Day');
+        //   data.addColumn('number', 'Guardians of the Galaxy');
+        //   data.addColumn('number', 'The Avengers');
+        //   data.addColumn('number', 'Transformers: Age of Extinction');
+
+        //   data.addRows([
+        //     [1, 37.8, 80.8, 41.8],
+        //     [2, 30.9, 69.5, 32.4],
+        //     [3, 25.4, 57, 25.7],
+        //     [4, 11.7, 18.8, 10.5],
+        //     [5, 11.9, 17.6, 10.4],
+        //     [6, 8.8, 13.6, 7.7],
+        //     [7, 7.6, 12.3, 9.6],
+        //     [8, 12.3, 29.2, 10.6],
+        //     [9, 16.9, 42.9, 14.8],
+        //     [10, 12.8, 30.9, 11.6],
+        //     [11, 5.3, 7.9, 4.7],
+        //     [12, 6.6, 8.4, 5.2],
+        //     [13, 4.8, 6.3, 3.6],
+        //     [14, 4.2, 6.2, 3.4],
+        //   ]);
+
+        //   var options = {
+        //     chart: {
+        //       title: 'Box Office Earnings in First Two Weeks of Opening',
+        //       subtitle: 'in millions of dollars (USD)',
+        //     },
+        //     width: 900,
+        //     height: 500,
+        //   };
+
+        //   var chart = new google.visualization.Line(ldexChartRef.value);
+
+        //   chart.draw(data, google.visualization.Line.convertOptions(options));
+        // }
+        console.log([['Date', 'Price'], ...chartData]);
+        function drawChart() {
+          const data = google.visualization.arrayToDataTable(
+            [
+              ['Mon', 20, 28, 38, 45],
+              ['Tue', 31, 38, 55, 66],
+              ['Wed', 50, 55, 77, 80],
+              ['Thu', 77, 77, 66, 50],
+              ['Fri', 68, 66, 22, 15],
+              // Treat first row as data as well.
+            ],
+            true,
+          );
+
+          const options = {
+            legend: 'none',
+          };
+
+          const chart = new google.visualization.CandlestickChart(
+            ldexChartRef.value,
+          );
+
+          chart.draw(data, options);
+        }
+        // function drawChart() {
+        //   const data = google.visualization.arrayToDataTable(
+        //     [['Date', 'Price'], ...chartData],
+        //     true,
+        //   );
+
+        //   const options = {
+        //     chart: {
+        //       title: 'Box Office Earnings in First Two Weeks of Opening',
+        //       subtitle: 'in millions of dollars (USD)',
+        //     },
+        //     // width: 900,
+        //     // height: 500,
+        //   };
+
+        //   const chart = new google.visualization.LineChart(ldexChartRef.value);
+
+        //   chart.draw(data, options);
+        // }
       })
       .catch((err) => {
         console.error(err);
