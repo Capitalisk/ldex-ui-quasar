@@ -90,79 +90,79 @@
             {{ numberToDecimal(valueRemaining * price) }}
           </div>
         </div>
+        <!-- </div> -->
       </div>
-    </div>
-    <div class="col-3 ldex-border-top">
-      <div class="row justify-center q-pa-md">
-        <q-tabs v-model="marketTab">
-          <q-tab name="market">Market</q-tab>
-          <q-tab name="limit">Limit</q-tab>
-        </q-tabs>
-      </div>
-      <div class="row q-pa-md">
-        <div class="col q-gutter-y-md">
-          <q-btn-toggle
-            v-model="method"
-            no-caps
-            rounded
-            unelevated
-            :toggle-color="method === 'buy' ? 'positive' : 'negative'"
-            :text-color="method === 'buy' ? 'negative' : 'positive'"
-            spread
-            :options="[
-              { label: 'Sell', value: 'sell' },
-              { label: 'Buy', value: 'buy' },
-            ]"
-            @click="focusAmount"
-          />
-          <p>Amount</p>
-          <q-input
-            :color="method === 'buy' ? 'positive' : 'negative'"
-            dense
-            rounded
-            outlined
-            ref="amountRef"
-            :model-value="amount"
-            @update:model-value="updateAmount"
-          >
-            <template v-slot:append>
-              <q-chip size="sm" square>
-                {{ method === 'buy' ? sellToken : buyToken }}
-              </q-chip>
-            </template>
-          </q-input>
-          <div>
-            Expected price:
-            {{
-              method === 'buy' ? amount * currentPrice : amount / currentPrice
-            }}
-            {{ method === 'buy' ? buyToken : sellToken }}
-          </div>
-          <!-- This button should be replace by connect wallet if the user isn't signed in for the transaction to take effect -->
-          <!-- <q-btn
+      <div class="col-3 ldex-border-top">
+        <div class="row justify-center q-pa-md">
+          <q-tabs v-model="marketTab">
+            <q-tab name="market">Market</q-tab>
+            <q-tab name="limit">Limit</q-tab>
+          </q-tabs>
+        </div>
+        <div class="row q-pa-md">
+          <div class="col q-gutter-y-md">
+            <q-btn-toggle
+              v-model="method"
+              no-caps
+              rounded
+              unelevated
+              :toggle-color="method === 'buy' ? 'positive' : 'negative'"
+              :text-color="method === 'buy' ? 'negative' : 'positive'"
+              spread
+              :options="[
+                { label: 'Sell', value: 'sell' },
+                { label: 'Buy', value: 'buy' },
+              ]"
+              @click="focusAmount"
+            />
+            <p>Amount</p>
+            <q-input
+              :color="method === 'buy' ? 'positive' : 'negative'"
+              dense
+              rounded
+              outlined
+              ref="amountRef"
+              :model-value="amount"
+              @update:model-value="updateAmount"
+            >
+              <template v-slot:append>
+                <q-chip size="sm" square>
+                  {{ method === 'buy' ? sellToken : buyToken }}
+                </q-chip>
+              </template>
+            </q-input>
+            <div>
+              Expected price:
+              {{
+                method === 'buy' ? amount * currentPrice : amount / currentPrice
+              }}
+              {{ method === 'buy' ? buyToken : sellToken }}
+            </div>
+            <!-- This button should be replace by connect wallet if the user isn't signed in for the transaction to take effect -->
+            <!-- <q-btn
               :color="method === 'buy' ? 'positive' : 'negative'"
               rounded
               class="full-width"
               :label="`${method} ${method === 'buy' ? buyToken : sellToken}`"
             /> -->
-          <q-btn
-            :color="method === 'buy' ? 'positive' : 'negative'"
-            :label="`Connect ${method === 'buy' ? sellToken : buyToken}`"
-            icon-right="mdi-wallet"
-            rounded
-            outline
-            xs
-            dense
-            @click="wallets[sellToken] = true"
-            class="full-width"
-          >
-            <q-dialog v-model="wallets[sellToken]">
-              <Login :token="sellToken" />
-            </q-dialog>
-          </q-btn>
+            <q-btn
+              :color="method === 'buy' ? 'positive' : 'negative'"
+              :label="`Connect ${method === 'buy' ? sellToken : buyToken}`"
+              icon-right="mdi-wallet"
+              rounded
+              outline
+              xs
+              dense
+              @click="wallets[sellToken] = true"
+              class="full-width"
+            >
+              <q-dialog v-model="wallets[sellToken]">
+                <Login :token="sellToken" />
+              </q-dialog>
+            </q-btn>
+          </div>
         </div>
       </div>
-      <!-- </div> -->
     </div>
   </q-page>
 </template>
