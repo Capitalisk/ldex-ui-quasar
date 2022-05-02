@@ -1,118 +1,27 @@
 <template>
-  <div class="q-page q-pb-md">
-    <div class="row" v-if="currentPrice">
+  <q-page>
+    <div class="row absolute-bottom absolute-top" v-if="currentPrice">
       <div class="col">
         <div class="row" ref="ldexChartRef"></div>
-        <div class="row q-pa-md">
-          <q-tabs v-model="marketTab">
-            <q-tab name="limit">Limit</q-tab>
-            <q-tab name="market">Market</q-tab>
-            <q-tab name="my-orders">My Orders</q-tab>
-          </q-tabs>
-        </div>
-        <div class="row q-pa-md q-gutter-md">
-          <div class="col">
-            <div class="row q-py-md">
-              <div class="col">
-                <strong>Buy {{ buyToken }}</strong>
-                <q-btn
-                  label="&#8505;"
-                  size="sm"
-                  round
-                  color="primary"
-                  class="q-ml-sm"
-                >
-                  <q-tooltip
-                    anchor="center right"
-                    self="center left"
-                    :offset="[10, 10]"
-                  >
-                    The BUY panel lets you convert your
-                    {{ buyToken }} into {{ sellToken }}.
-                  </q-tooltip>
-                </q-btn>
-              </div>
-              <div class="col text-grey-7 q-my-auto text-right">1280 LSK</div>
-            </div>
-            <div class="row q-gutter-md">
-              <div class="col">
-                <q-input filled outlined v-model="text" label="rounded" />
-              </div>
-              <div class="col">
-                <q-input filled outlined v-model="text" label="rounded" />
-              </div>
-            </div>
-            <div class="row q-py-md">
-              <div class="col text-center">
-                <q-btn
-                  align="center"
-                  class="btn-fixed-width"
-                  rounded
-                  outline
-                  color="green"
-                  label="Buy LSH"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="row q-py-md">
-              <div class="col">
-                <strong>Sell {{ sellToken }}</strong>
-                <q-btn
-                  label="&#8505;"
-                  size="sm"
-                  round
-                  color="primary"
-                  class="q-ml-sm"
-                >
-                  <q-tooltip
-                    anchor="center right"
-                    self="center left"
-                    :offset="[10, 10]"
-                  >
-                    The SELL panel lets you convert your
-                    {{ sellToken }} into {{ buyToken }}.
-                  </q-tooltip>
-                </q-btn>
-              </div>
-              <div class="col text-grey-7 q-my-auto text-right">1280 LSH</div>
-            </div>
-            <div class="row q-gutter-md">
-              <div class="col">
-                <q-input filled outlined v-model="text" label="rounded" />
-              </div>
-              <div class="col">
-                <q-input filled outlined v-model="text" label="rounded" />
-              </div>
-            </div>
-            <div class="row q-py-md">
-              <div class="col text-center">
-                <q-btn
-                  align="center"
-                  class="btn-fixed-width"
-                  rounded
-                  outline
-                  color="red"
-                  label="Sell LSH"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-      <div class="col-3">
+      <div
+        class="col-3 full-height ldex-border-top ldex-border-left ldex-border-right"
+      >
+        <!-- <div class="full-height column no-wrap justify-center"> -->
         <div class="row text-grey-7 q-pa-sm">
           <div class="col">
-            Price ({{ sellToken }})
+            Price
+            <q-chip size="sm" square>{{ sellToken }}</q-chip>
             <q-tooltip>The price {{ sellToken }} is being sold at</q-tooltip>
           </div>
           <div class="col text-right">
-            Amount ({{ buyToken }})
+            Amount
+            <q-chip size="sm" square>{{ buyToken }}</q-chip>
             <q-tooltip>The amount of {{ buyToken }} being sold</q-tooltip>
           </div>
           <div class="col text-right">
-            Total ({{ buyToken }})
+            Total
+            <q-chip size="sm" square>{{ buyToken }}</q-chip>
             <q-tooltip>The total amount of {{ buyToken }} being sold</q-tooltip>
           </div>
         </div>
@@ -125,53 +34,22 @@
           }%, rgba(0, 0, 0, 0) 1%);`"
         >
           <div class="col">{{ price }} {{ sellToken }}</div>
-          <div class="col text-right">{{ numberToDecimal(sizeRemaining) }}</div>
+          <div class="col text-right">
+            {{ numberToDecimal(sizeRemaining) }}
+          </div>
           <div class="col text-right">
             {{ numberToDecimal(sizeRemaining * price) }}
           </div>
         </div>
         <div class="row text-red q-py-md q-px-sm">
-          <div class="col-4">
+          <div class="col-5">
             <h6 class="q-my-xs">1 {{ buyToken }}</h6>
           </div>
-
-          <div class="col-8 text-right">
-            <q-btn
-              :label="`Connect ${buyToken}`"
-              icon-right="mdi-wallet"
-              rounded
-              outline
-              xs
-              dense
-              @click="wallets[buyToken] = true"
-              style="width: 175px"
-            >
-              <q-dialog v-model="wallets[buyToken]">
-                <Login :token="buyToken" />
-              </q-dialog>
-            </q-btn>
+          <div class="col-2 text-center">
+            <h6 class="q-my-xs">=</h6>
           </div>
-          <div class="col-12">
-            <span class="q-ml-xl q-my-xs text-caption">=</span>
-          </div>
-          <div class="col-4">
+          <div class="col-5 text-right">
             <h6 class="q-my-xs">{{ currentPrice }} {{ sellToken }}</h6>
-          </div>
-          <div class="col-8 text-right">
-            <q-btn
-              :label="`Connect ${sellToken}`"
-              icon-right="mdi-wallet"
-              rounded
-              outline
-              xs
-              dense
-              @click="wallets[sellToken] = true"
-              style="width: 175px"
-            >
-              <q-dialog v-model="wallets[sellToken]">
-                <Login :token="sellToken" />
-              </q-dialog>
-            </q-btn>
           </div>
         </div>
         <div class="row text-grey-7 q-pa-sm">
@@ -179,18 +57,21 @@
             class="col"
             style="border-color: rgb(40, 97, 19); border-top: 2px"
           >
-            Price ({{ sellToken }})
+            Price
+            <q-chip size="sm" square>{{ sellToken }}</q-chip>
             <q-tooltip>The price {{ sellToken }} is being bought at</q-tooltip>
           </div>
           <div class="col text-right">
-            Amount ({{ sellToken }})
+            Amount
+            <q-chip size="sm" square>{{ sellToken }}</q-chip>
             <q-tooltip>The amount of {{ sellToken }} being bought</q-tooltip>
           </div>
           <div class="col text-right">
-            Total ({{ sellToken }})
-            <q-tooltip
-              >The total amount of {{ sellToken }} being bought</q-tooltip
-            >
+            Total
+            <q-chip size="sm" square>{{ sellToken }}</q-chip>
+            <q-tooltip>
+              The total amount of {{ sellToken }} being bought
+            </q-tooltip>
           </div>
         </div>
         <div
@@ -210,13 +91,84 @@
           </div>
         </div>
       </div>
-      <div class="col-3"></div>
     </div>
-  </div>
+    <div class="col-3 ldex-border-top">
+      <div class="row justify-center q-pa-md">
+        <q-tabs v-model="marketTab">
+          <q-tab name="market">Market</q-tab>
+          <q-tab name="limit">Limit</q-tab>
+        </q-tabs>
+      </div>
+      <div class="row q-pa-md">
+        <div class="col q-gutter-y-md">
+          <q-btn-toggle
+            v-model="method"
+            no-caps
+            rounded
+            unelevated
+            :toggle-color="method === 'buy' ? 'positive' : 'negative'"
+            :text-color="method === 'buy' ? 'negative' : 'positive'"
+            spread
+            :options="[
+              { label: 'Sell', value: 'sell' },
+              { label: 'Buy', value: 'buy' },
+            ]"
+            @click="focusAmount"
+          />
+          <p>Amount</p>
+          <q-input
+            :color="method === 'buy' ? 'positive' : 'negative'"
+            dense
+            rounded
+            outlined
+            ref="amountRef"
+            :model-value="amount"
+            @update:model-value="updateAmount"
+          >
+            <template v-slot:append>
+              <q-chip size="sm" square>
+                {{ method === 'buy' ? sellToken : buyToken }}
+              </q-chip>
+            </template>
+          </q-input>
+          <div>
+            Expected price:
+            {{
+              method === 'buy' ? amount * currentPrice : amount / currentPrice
+            }}
+            {{ method === 'buy' ? buyToken : sellToken }}
+          </div>
+          <!-- This button should be replace by connect wallet if the user isn't signed in for the transaction to take effect -->
+          <!-- <q-btn
+              :color="method === 'buy' ? 'positive' : 'negative'"
+              rounded
+              class="full-width"
+              :label="`${method} ${method === 'buy' ? buyToken : sellToken}`"
+            /> -->
+          <q-btn
+            :color="method === 'buy' ? 'positive' : 'negative'"
+            :label="`Connect ${method === 'buy' ? sellToken : buyToken}`"
+            icon-right="mdi-wallet"
+            rounded
+            outline
+            xs
+            dense
+            @click="wallets[sellToken] = true"
+            class="full-width"
+          >
+            <q-dialog v-model="wallets[sellToken]">
+              <Login :token="sellToken" />
+            </q-dialog>
+          </q-btn>
+        </div>
+      </div>
+      <!-- </div> -->
+    </div>
+  </q-page>
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, reactive, onMounted } from 'vue';
+import { ref, computed, watchEffect, reactive, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { GoogleCharts } from 'google-charts';
 
@@ -239,6 +191,8 @@ const maxSize = reactive({
 });
 const wallets = reactive({});
 const priceHistory = ref([]);
+const method = ref('buy');
+const amount = ref(null);
 
 const ldexChartRef = ref();
 
@@ -320,7 +274,6 @@ watchEffect(() => {
 
         //   chart.draw(data, google.visualization.Line.convertOptions(options));
         // }
-        console.log([['Date', 'Price'], ...chartData]);
         function drawChart() {
           const data = google.visualization.arrayToDataTable(
             [
@@ -336,6 +289,22 @@ watchEffect(() => {
 
           const options = {
             legend: 'none',
+            height: 600,
+            backgroundColor: {
+              fillOpacity: 0,
+            },
+            hAxis: {
+              textStyle: { color: '#FFF' },
+            },
+            vAxis: {
+              textStyle: { color: '#FFF' },
+            },
+            chartArea: {
+              left: 5,
+              top: 20,
+              width: '100%',
+              height: '350',
+            },
           };
 
           const chart = new google.visualization.CandlestickChart(
@@ -399,16 +368,47 @@ watchEffect(() => {
   }
 });
 
-const marketTab = ref('limit');
-const text = ref('4033');
+const amountRef = ref(null);
+const marketTab = ref('market');
 const tab = computed(() => store.state.activeTab);
 const buyToken = computed(() => tab.value.split('/')[0].toUpperCase());
 const sellToken = computed(() => tab.value.split('/')[1].toUpperCase());
 const numberToDecimal = (v) => (v / 100000000).toLocaleString('en-US');
+const focusAmount = () => {
+  amount.value = null;
+  amountRef.value.focus();
+};
+const updateAmount = (v) =>
+  Number.isNaN(parseInt(v))
+    ? (amount.value = null)
+    : (amount.value = parseInt(v));
+watch(
+  () => amountRef.value,
+  (n) => {
+    n?.focus();
+  },
+);
 </script>
 
 <style lang="scss" scoped>
+@import '../../css/quasar.variables.scss';
+
 .btn-fixed-width {
   width: 200px;
+}
+
+.ldex-border {
+  &-top {
+    border-top: 1px solid $border-color;
+  }
+  &-bottom {
+    border-bottom: 1px solid $border-color;
+  }
+  &-right {
+    border-right: 1px solid $border-color;
+  }
+  &-left {
+    border-left: 1px solid $border-color;
+  }
 }
 </style>

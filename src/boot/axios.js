@@ -3,7 +3,7 @@ import axios from 'axios';
 import store from 'src/store';
 
 let api = axios.create({
-  baseURL: 'http://45.76.175.50:8021',
+  baseURL: 'http://154.53.44.204:8021',
 });
 
 api.interceptors.request.use((r) => {
