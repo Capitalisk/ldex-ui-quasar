@@ -301,7 +301,7 @@ watchEffect(() => {
               height: '350',
             },
             bar: { groupWidth: '100%' },
-            colors: ['#0366d6'],
+            colors: ['#0366d6', '#FFF'],
           };
 
           var chart = new google.visualization.ComboChart(ldexChartRef.value);
