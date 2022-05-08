@@ -167,16 +167,18 @@
 
 <script setup>
 import { ref, computed, watchEffect, reactive, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useStore } from 'src/store';
 import { useQuasar } from 'quasar';
 import gsap from 'gsap';
 
 import { api } from 'src/boot/axios';
 
 import Login from '../Login.vue';
-import { useRoute } from 'vue-router';
 
 const $q = useQuasar();
 const route = useRoute();
+const store = useStore();
 
 const buyingOffers = ref([]);
 const sellingOffers = ref([]);
@@ -191,7 +193,9 @@ const wallets = reactive({});
 const priceHistory = ref([]);
 const method = ref('buy');
 const amount = ref(null);
-const chartData = ref();
+const marketConfig = computed(
+  () => store.state.config.assets[route.query.market.split('/')[1]],
+);
 
 const ldexChartRef = ref();
 
@@ -245,37 +249,50 @@ watchEffect(() => {
     api
       .get('/prices/recent')
       .then(({ data }) => {
+        const unitValue = Number(marketConfig.value.unitValue);
+        const timeMultiplier = Number(marketConfig.value.timeMultiplier) || 1;
+        const timeOffset = Number(marketConfig.value.timeOffset) || 0;
+
+        console.log(unitValue, timeMultiplier, timeOffset);
+
         currentPrice.value = data[0]?.price;
         priceHistory.value = data;
 
-        let volumeDisplayHeightRatio = 0.1;
+        const volumeDisplayHeightRatio = 100000;
 
         const maxVolume = data.reduce(
           (accumulator, entry) =>
-            entry.volume > accumulator ? entry.volume : accumulator,
+            Number(entry.volume) > accumulator
+              ? Number(entry.volume)
+              : accumulator,
           -Infinity,
         );
         const maxPrice = data.reduce(
           (accumulator, entry) =>
-            entry.price > accumulator ? entry.price : accumulator,
+            Number(entry.price) > accumulator
+              ? Number(entry.price)
+              : accumulator,
           -Infinity,
         );
 
         const chartData = data.map((entry) => [
-          new Date(entry.quoteTimestamp).toLocaleDateString('en-GB', {
+          new Date(
+            Math.round(entry.baseTimestamp * timeMultiplier + timeOffset),
+          ).toLocaleDateString('en-GB', {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
             hour: 'numeric',
             minute: 'numeric',
           }),
-          (parseInt(entry.volume) / parseInt(maxVolume)) *
+          (Math.round((Number(entry.volume) * 100) / maxVolume) *
             maxPrice *
-            volumeDisplayHeightRatio,
+            volumeDisplayHeightRatio) /
+            unitValue,
           entry.price,
         ]);
 
-        console.log(chartData);
+        console.log(chartData[0]);
 
         google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(drawVisualization);
