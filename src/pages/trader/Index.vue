@@ -127,14 +127,14 @@
             >
               <template v-slot:append>
                 <q-chip size="sm" square>
-                  {{ method === 'buy' ? sellToken : buyToken }}
+                  {{ method === 'buy' ? buyToken : sellToken }}
                 </q-chip>
               </template>
             </q-input>
             <div>
               Expected price:
               {{ expectedPrice }}
-              {{ method === 'buy' ? buyToken : sellToken }}
+              {{ method === 'buy' ? sellToken : buyToken }}
             </div>
             <!-- This button should be replace by connect wallet if the user isn't signed in for the transaction to take effect -->
             <!-- <q-btn
@@ -299,12 +299,12 @@ watchEffect(() => {
 
         function drawVisualization() {
           // Some raw data (not necessarily accurate)
-          var data = google.visualization.arrayToDataTable([
+          const data = google.visualization.arrayToDataTable([
             ['Time', 'Volume', 'Price'],
             ...chartData.reverse(),
           ]);
 
-          var options = {
+          const options = {
             // title: 'Monthly Coffee Production by Country',
             seriesType: 'bars',
             series: { 1: { type: 'line' } },
@@ -335,7 +335,7 @@ watchEffect(() => {
             colors: ['#0366d6', '#FFF'],
           };
 
-          var chart = new google.visualization.ComboChart(ldexChartRef.value);
+          const chart = new google.visualization.ComboChart(ldexChartRef.value);
           chart.draw(data, options);
         }
       })
