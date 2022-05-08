@@ -133,9 +133,7 @@
             </q-input>
             <div>
               Expected price:
-              {{
-                method === 'buy' ? amount * currentPrice : amount / currentPrice
-              }}
+              {{ expectedPrice }}
               {{ method === 'buy' ? buyToken : sellToken }}
             </div>
             <!-- This button should be replace by connect wallet if the user isn't signed in for the transaction to take effect -->
@@ -170,6 +168,7 @@
 <script setup>
 import { ref, computed, watchEffect, reactive, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import gsap from 'gsap';
 
 import { api } from 'src/boot/axios';
 
@@ -177,6 +176,7 @@ import Login from '../Login.vue';
 import { useRoute } from 'vue-router';
 
 const $q = useQuasar();
+const route = useRoute();
 
 const buyingOffers = ref([]);
 const sellingOffers = ref([]);
@@ -191,9 +191,26 @@ const wallets = reactive({});
 const priceHistory = ref([]);
 const method = ref('buy');
 const amount = ref(null);
-const route = useRoute();
+const chartData = ref();
 
 const ldexChartRef = ref();
+
+const tweened = reactive({
+  number: 0,
+});
+
+watch(amount, (n) => {
+  gsap.to(tweened, { duration: 0.5, number: Number(n) || 0 });
+});
+
+const expectedPrice = computed(() => {
+  const value =
+    method.value === 'buy'
+      ? tweened.number.toFixed(2) * currentPrice.value
+      : tweened.number.toFixed(2) / currentPrice.value;
+
+  return value.toFixed(2);
+});
 
 watchEffect(() => {
   if (route.query.market) {
@@ -243,9 +260,6 @@ watchEffect(() => {
             entry.price > accumulator ? entry.price : accumulator,
           -Infinity,
         );
-
-        console.log(parseInt(maxVolume), maxPrice);
-        console.log(data[0])
 
         const chartData = data.map((entry) => [
           new Date(entry.quoteTimestamp).toLocaleDateString('en-GB', {
