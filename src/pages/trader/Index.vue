@@ -168,17 +168,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, reactive, onMounted, watch } from 'vue';
+import { ref, computed, watchEffect, reactive, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { GoogleCharts } from 'google-charts';
 
 import { api } from 'src/boot/axios';
-import { useStore } from 'src/store';
 
 import Login from '../Login.vue';
 import { useRoute } from 'vue-router';
 
-const store = useStore();
 const $q = useQuasar();
 
 const buyingOffers = ref([]);
@@ -234,62 +231,52 @@ watchEffect(() => {
         currentPrice.value = data[0]?.price;
         priceHistory.value = data;
 
-        const chartData = data.map((e) => [e.baseTimestamp, e.price]);
+        let volumeDisplayHeightRatio = 0.1;
 
-        //Load the charts library with a callback
-        GoogleCharts.load(drawChart);
+        const maxVolume = data.reduce(
+          (accumulator, entry) =>
+            entry.volume > accumulator ? entry.volume : accumulator,
+          -Infinity,
+        );
+        const maxPrice = data.reduce(
+          (accumulator, entry) =>
+            entry.price > accumulator ? entry.price : accumulator,
+          -Infinity,
+        );
 
-        // function drawChart() {
-        //   var data = new google.visualization.DataTable();
-        //   data.addColumn('number', 'Day');
-        //   data.addColumn('number', 'Guardians of the Galaxy');
-        //   data.addColumn('number', 'The Avengers');
-        //   data.addColumn('number', 'Transformers: Age of Extinction');
+        console.log(parseInt(maxVolume), maxPrice);
+        console.log(data[0])
 
-        //   data.addRows([
-        //     [1, 37.8, 80.8, 41.8],
-        //     [2, 30.9, 69.5, 32.4],
-        //     [3, 25.4, 57, 25.7],
-        //     [4, 11.7, 18.8, 10.5],
-        //     [5, 11.9, 17.6, 10.4],
-        //     [6, 8.8, 13.6, 7.7],
-        //     [7, 7.6, 12.3, 9.6],
-        //     [8, 12.3, 29.2, 10.6],
-        //     [9, 16.9, 42.9, 14.8],
-        //     [10, 12.8, 30.9, 11.6],
-        //     [11, 5.3, 7.9, 4.7],
-        //     [12, 6.6, 8.4, 5.2],
-        //     [13, 4.8, 6.3, 3.6],
-        //     [14, 4.2, 6.2, 3.4],
-        //   ]);
+        const chartData = data.map((entry) => [
+          new Date(entry.quoteTimestamp).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+          }),
+          (parseInt(entry.volume) / parseInt(maxVolume)) *
+            maxPrice *
+            volumeDisplayHeightRatio,
+          entry.price,
+        ]);
 
-        //   var options = {
-        //     chart: {
-        //       title: 'Box Office Earnings in First Two Weeks of Opening',
-        //       subtitle: 'in millions of dollars (USD)',
-        //     },
-        //     width: 900,
-        //     height: 500,
-        //   };
+        console.log(chartData);
 
-        //   var chart = new google.visualization.Line(ldexChartRef.value);
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(drawVisualization);
 
-        //   chart.draw(data, google.visualization.Line.convertOptions(options));
-        // }
-        function drawChart() {
-          const data = google.visualization.arrayToDataTable(
-            [
-              ['Mon', 20, 28, 38, 45],
-              ['Tue', 31, 38, 55, 66],
-              ['Wed', 50, 55, 77, 80],
-              ['Thu', 77, 77, 66, 50],
-              ['Fri', 68, 66, 22, 15],
-              // Treat first row as data as well.
-            ],
-            true,
-          );
+        function drawVisualization() {
+          // Some raw data (not necessarily accurate)
+          var data = google.visualization.arrayToDataTable([
+            ['Time', 'Volume', 'Price'],
+            ...chartData.reverse(),
+          ]);
 
-          const options = {
+          var options = {
+            // title: 'Monthly Coffee Production by Country',
+            seriesType: 'bars',
+            series: { 1: { type: 'line' } },
             legend: 'none',
             height: 600,
             backgroundColor: {
@@ -297,9 +284,15 @@ watchEffect(() => {
             },
             hAxis: {
               textStyle: { color: '#FFF' },
+              gridlines: {
+                color: '#000',
+              },
             },
             vAxis: {
               textStyle: { color: '#FFF' },
+              gridlines: {
+                interval: 0,
+              },
             },
             chartArea: {
               left: 5,
@@ -307,33 +300,13 @@ watchEffect(() => {
               width: '100%',
               height: '350',
             },
+            bar: { groupWidth: '100%' },
+            colors: ['#0366d6'],
           };
 
-          const chart = new google.visualization.CandlestickChart(
-            ldexChartRef.value,
-          );
-
+          var chart = new google.visualization.ComboChart(ldexChartRef.value);
           chart.draw(data, options);
         }
-        // function drawChart() {
-        //   const data = google.visualization.arrayToDataTable(
-        //     [['Date', 'Price'], ...chartData],
-        //     true,
-        //   );
-
-        //   const options = {
-        //     chart: {
-        //       title: 'Box Office Earnings in First Two Weeks of Opening',
-        //       subtitle: 'in millions of dollars (USD)',
-        //     },
-        //     // width: 900,
-        //     // height: 500,
-        //   };
-
-        //   const chart = new google.visualization.LineChart(ldexChartRef.value);
-
-        //   chart.draw(data, options);
-        // }
       })
       .catch((err) => {
         console.error(err);

@@ -13,7 +13,6 @@
     "@quasar/extras": "^1.13.5",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
-    "google-charts": "^2.0.0",
     "ldex-ui-ldpos-adapter": "^4.3.0",
     "ldex-ui-lisk-adapter": "^1.2.0",
     "ldex-ui-lisk-v3-adapter": "^1.3.0",
