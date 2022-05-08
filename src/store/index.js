@@ -5,7 +5,6 @@ import LiskAdapter from 'ldex-ui-lisk-adapter';
 import LDPoSAdapter from 'ldex-ui-ldpos-adapter';
 
 import config from '../../.env.production.json';
-import { changeBaseURL } from 'src/boot/axios';
 
 export const adapters = {
   lisk3: LiskV3Adapter,
@@ -44,7 +43,6 @@ const state = reactive({
   keys: {},
   assetAdapters: {},
   isLoadingWallet: {},
-  activeTab: '',
   loading: false,
 });
 
@@ -52,14 +50,8 @@ const store = {
   state: readonly(state),
   assetNames: computed(() => Object.keys(state.config.assets)),
   marketNames: computed(() => Object.keys(state.config.markets)),
-  changeTab: (t) => {
-    state.activeTab = t;
-    changeBaseURL(state.config.markets[t].apiURL);
-  },
   mutateLoading: (v) => (state.loading = v),
 };
-
-state.activeTab = store.marketNames.value[0];
 
 for (const a of store.assetNames.value) {
   const { adapter } = store.state.config.assets[a];

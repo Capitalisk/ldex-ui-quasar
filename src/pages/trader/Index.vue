@@ -176,6 +176,7 @@ import { api } from 'src/boot/axios';
 import { useStore } from 'src/store';
 
 import Login from '../Login.vue';
+import { useRoute } from 'vue-router';
 
 const store = useStore();
 const $q = useQuasar();
@@ -193,11 +194,12 @@ const wallets = reactive({});
 const priceHistory = ref([]);
 const method = ref('buy');
 const amount = ref(null);
+const route = useRoute();
 
 const ldexChartRef = ref();
 
 watchEffect(() => {
-  if (store.state.activeTab) {
+  if (route.query.market) {
     sellingOffers.value = [];
     buyingOffers.value = [];
     currentPrice.value = null;
@@ -370,9 +372,9 @@ watchEffect(() => {
 
 const amountRef = ref(null);
 const marketTab = ref('market');
-const tab = computed(() => store.state.activeTab);
-const buyToken = computed(() => tab.value.split('/')[0].toUpperCase());
-const sellToken = computed(() => tab.value.split('/')[1].toUpperCase());
+const tab = computed(() => route.query.market);
+const buyToken = computed(() => tab.value?.split('/')[0].toUpperCase());
+const sellToken = computed(() => tab.value?.split('/')[1].toUpperCase());
 const numberToDecimal = (v) => (v / 100000000).toLocaleString('en-US');
 const focusAmount = () => {
   amount.value = null;
