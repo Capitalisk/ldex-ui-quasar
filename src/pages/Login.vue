@@ -25,7 +25,7 @@
               placeholder="__________"
               @keydown="(e) => backspace(e, i)"
               @keyup.enter="signin"
-              @focus="() => !pasting && (input = '')"
+              @focus="() => !pasting && (input.value = '')"
               :rules="[
                 (val) => !!val || (val && val.length <= 0) || 'Required',
               ]"
@@ -60,9 +60,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-
-import { useStore } from 'src/store';
+import { onBeforeMount, ref, watch, nextTick } from 'vue';
 
 import CreateWallet from 'src/components/CreateWallet.vue';
 
@@ -70,18 +68,20 @@ defineProps({
   token: String,
 });
 
-const store = useStore();
-
 // const markets = computed(() => store.marketNames.value);
 
 const inputs = ref(new Array(12));
 const hidden = ref(false);
+const passphrase = ref(null);
+const pasting = ref(false);
 
 const inputRefs = ref([]);
 
-for (let i = 0; i < inputs.value.length; i++) {
-  inputs.value[i] = { value: '' };
-}
+onBeforeMount(() => {
+  for (let i = 0; i < inputs.value.length; i++) {
+    inputs.value[i] = { value: '' };
+  }
+});
 
 const signin = () => {};
 
@@ -94,6 +94,43 @@ const backspace = (e, i) => {
     inputRefs.value[i - 1].focus()
   );
 };
+
+watch(
+  () => inputs.value,
+  async (n) => {
+    for (let i = 0; i < n.length; i++) {
+      if (!n[i]) continue;
+
+      const element = n[i].value;
+      const lastInput = inputRefs.value[i - 1];
+
+      if (element && element.split(' ').length === 12) {
+        pasting.value = true;
+        inputs.value = element.split(' ').map((el) => ({ value: el }));
+        try {
+          await validateAllInputs();
+        } catch (e) {}
+        lastInput.focus();
+        pasting.value = false;
+      } else if (element && element.includes(' ')) {
+        const nextInput = inputRefs.value[i + 1];
+        if (nextInput) {
+          nextInput.focus();
+          nextTick(() => (nextInput.value = ''));
+        }
+        inputs.value[i].value = inputs.value[i].value.replace(/\s/g, '');
+      }
+    }
+    passphrase.value = n
+      .filter((el) => el.value !== '')
+      .map((el) => el.value)
+      .join(' ');
+  },
+  {
+    deep: true,
+    immediate: false,
+  },
+);
 </script>
 
 <style lang="scss" scoped></style>
