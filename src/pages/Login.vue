@@ -50,7 +50,13 @@
             </q-input>
           </div>
           <div class="col-12 flex justify-center q-gutter-sm">
-            <q-btn rounded label="Login" color="primary" class="q-px-lg" />
+            <q-btn
+              rounded
+              label="Login"
+              color="primary"
+              class="q-px-lg"
+              @click="signin"
+            />
             <CreateWallet />
           </div>
         </div>
@@ -63,10 +69,17 @@
 import { onBeforeMount, ref, watch, nextTick } from 'vue';
 
 import CreateWallet from 'src/components/CreateWallet.vue';
+import { useStore } from 'src/store';
+import { useQuasar } from 'quasar';
 
-defineProps({
+const props = defineProps({
   token: String,
 });
+
+const emit = defineEmits(['loggedIn']);
+
+const store = useStore();
+const $q = useQuasar();
 
 // const markets = computed(() => store.marketNames.value);
 
@@ -83,7 +96,19 @@ onBeforeMount(() => {
   }
 });
 
-const signin = () => {};
+const validateAllInputs = async () => {
+  // await new Promise((res) => setTimeout(() => res(), 100));
+  return await new Promise(async (res, rej) => {
+    let errors = [];
+    for (let i = 0; i < inputRefs.value.length; i++) {
+      const v = inputRefs.value[i];
+      await v.validate();
+      if (v.error) errors.push(v.error);
+    }
+    if (errors.length) rej(new Error('One or more fields are invalid.'));
+    res();
+  });
+};
 
 const backspace = (e, i) => {
   console.log(e);
@@ -131,6 +156,39 @@ watch(
     immediate: false,
   },
 );
+
+const signin = async () => {
+  try {
+    await validateAllInputs();
+
+    console.log(store.assetAdapters, props.token);
+
+    const assetAdapter = store.assetAdapters[props.token.toLocaleLowerCase()];
+    console.log(assetAdapter);
+
+    const isValid = assetAdapter.validatePassphrase({
+      passphrase: passphrase.value,
+    });
+    if (!isValid) throw new Error('Incorrect passphrase');
+
+    await assetAdapter.connect({ passphrase: passphrase.value });
+
+    const address =
+      assetAdapter.address ||
+      (await assetAdapter.getAddressFromPassphrase(passphrase.value));
+
+    store.setAssetDetails({
+      token: props.token,
+      address,
+      passphrase: passphrase.value,
+    });
+
+    emit('loggedIn');
+  } catch (e) {
+    console.error(e);
+    $q.notify({ message: e.message, color: 'negative' });
+  }
+};
 </script>
 
 <style lang="scss" scoped></style>

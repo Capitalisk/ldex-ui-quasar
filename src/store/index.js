@@ -24,7 +24,7 @@ const state = reactive({
     asks: [],
     maxSize: { bid: 0, ask: 0 },
   },
-  activeAssets: [],
+  activeAssets: {},
   // new, activeMarket string for selecting the active market out of the configuration object.
   activeMarket: '',
   enabledAssets: [],
@@ -48,9 +48,12 @@ const state = reactive({
 
 const store = {
   state: readonly(state),
+  assetAdapters: {},
   assetNames: computed(() => Object.keys(state.config.assets)),
   marketNames: computed(() => Object.keys(state.config.markets)),
   mutateLoading: (v) => (state.loading = v),
+  setAssetDetails: ({ token, address, passphrase }) =>
+    (state.activeAssets[token] = { address, passphrase }),
 };
 
 for (const a of store.assetNames.value) {
@@ -61,7 +64,7 @@ for (const a of store.assetNames.value) {
     throw new Error(`The ${adapter.type} adapter type is not supported`);
   }
   const assetAdapter = new AssetAdapter(cfg);
-  state.assetAdapters[a] = assetAdapter;
+  store.assetAdapters[a] = assetAdapter;
 }
 
 export default store;
