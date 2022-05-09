@@ -102,7 +102,7 @@ watch(
       if (!n[i]) continue;
 
       const element = n[i].value;
-      const lastInput = inputRefs.value[i - 1];
+      const lastInput = inputRefs.value[n.length - 1];
 
       if (element && element.split(' ').length === 12) {
         pasting.value = true;
