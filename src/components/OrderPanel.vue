@@ -88,19 +88,22 @@ import { onMounted, reactive, ref, watch, computed } from 'vue';
 import gsap from 'gsap';
 
 import Login from './Login.vue';
-import { getStatus } from 'src/boot/axios';
+import { api, getStatus } from 'src/boot/axios';
 import { useRoute } from 'vue-router';
 import { useStore } from 'src/store';
+import { useQuasar } from 'quasar';
 
 const props = defineProps({ currentPrice: { type: Number, required: true } });
 
 const route = useRoute();
 const store = useStore();
+const $q = useQuasar();
 
 const marketTab = ref('market');
 const amount = ref(null);
 const fees = ref({});
 const method = ref('buy');
+const recentTransactions = ref({});
 const wallets = reactive({});
 const tweened = reactive({
   number: 0,
@@ -170,22 +173,18 @@ const loggedIn = async () => {
   try {
     wallets[buyMarket] = false;
 
-    const { data } = await api.get('/status');
+    const data = await getStatus();
+    console.log(data);
     const chains = Object.keys(data.chains);
     for (let i = 0; i < chains.length; i++) {
       const chain = chains[i];
       const token = data.chains[chain];
-      api
-        .get(
-          `https://ldex.exchange/chain/lsh/api/transactions?senderId=${token.walletAddress}&limit=100&sort=timestamp:desc`,
-        )
-        .then(({ data: d }) => {
-          recentTransactions.value[chain] = d;
-        })
-        .catch((err) => {
-          console.error(err);
-          $q.notify({ message: err.message, color: 'red' });
-        });
+      const url = `https://ldex.exchange/chain/lsh/api/transactions?senderId=${token.walletAddress}&limit=100&sort=timestamp:desc`;
+
+      console.log(url);
+
+      const { data: d } = await api.get(url);
+      recentTransactions.value[chain] = d;
     }
   } catch (err) {
     console.error(err);

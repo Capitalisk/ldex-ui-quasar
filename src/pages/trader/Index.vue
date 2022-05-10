@@ -17,9 +17,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'src/store';
 import { useQuasar } from 'quasar';
 
 import { api } from 'src/boot/axios';
