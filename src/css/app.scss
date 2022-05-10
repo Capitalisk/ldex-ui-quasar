@@ -17,3 +17,19 @@ html {
 // .active-nav-tab {
 //   color: #81C341;
 // }
+
+
+.ldex-border {
+  &-top {
+    border-top: 1px solid $border-color !important;
+  }
+  &-bottom {
+    border-bottom: 1px solid $border-color !important;
+  }
+  &-right {
+    border-right: 1px solid $border-color !important;
+  }
+  &-left {
+    border-left: 1px solid $border-color !important;
+  }
+}

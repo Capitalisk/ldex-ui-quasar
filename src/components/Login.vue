@@ -56,6 +56,7 @@
               color="primary"
               class="q-px-lg"
               @click="signin"
+              :loading="loading"
             />
             <CreateWallet />
           </div>
@@ -87,6 +88,7 @@ const inputs = ref(new Array(12));
 const hidden = ref(false);
 const passphrase = ref(null);
 const pasting = ref(false);
+const loading = ref(false);
 
 const inputRefs = ref([]);
 
@@ -110,16 +112,11 @@ const validateAllInputs = async () => {
   });
 };
 
-const backspace = (e, i) => {
-  console.log(e);
-  return (
-    e.target.value === '' &&
-    e.keyCode === 8 &&
-    i !== 0 &&
-    inputRefs.value[i - 1].focus()
-  );
-};
-
+const backspace = (e, i) =>
+  e.target.value === '' &&
+  e.keyCode === 8 &&
+  i !== 0 &&
+  inputRefs.value[i - 1].focus();
 watch(
   () => inputs.value,
   async (n) => {
@@ -159,12 +156,11 @@ watch(
 
 const signin = async () => {
   try {
+    loading.value = true;
+
     await validateAllInputs();
 
-    console.log(store.assetAdapters, props.token);
-
     const assetAdapter = store.assetAdapters[props.token.toLocaleLowerCase()];
-    console.log(assetAdapter);
 
     const isValid = assetAdapter.validatePassphrase({
       passphrase: passphrase.value,
@@ -175,7 +171,9 @@ const signin = async () => {
 
     const address =
       assetAdapter.address ||
-      (await assetAdapter.getAddressFromPassphrase(passphrase.value));
+      (await assetAdapter.getAddressFromPassphrase({
+        passphrase: passphrase.value,
+      }));
 
     store.setAssetDetails({
       token: props.token,
@@ -187,6 +185,8 @@ const signin = async () => {
   } catch (e) {
     console.error(e);
     $q.notify({ message: e.message, color: 'negative' });
+  } finally {
+    loading.value = false;
   }
 };
 </script>

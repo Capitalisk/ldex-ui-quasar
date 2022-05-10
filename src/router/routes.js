@@ -4,12 +4,6 @@ const routes = [
     component: () => import('layouts/Trader.vue'),
     children: [{ path: '', component: () => import('pages/trader/Index.vue') }],
   },
-  {
-    path: '/login',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/Login.vue') }],
-  },
-
   // Always leave this as last one,
   // but you can also remove it
   {
