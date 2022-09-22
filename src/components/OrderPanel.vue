@@ -30,7 +30,8 @@
           outlined
           ref="amountRef"
           :model-value="amount"
-          @update:model-value="updateAmount"
+          pattern="[^\d.]"
+          @keyup="updateAmount"
         >
           <template v-slot:append>
             <q-chip size="sm" square>
@@ -41,8 +42,8 @@
         <div>
           Expected price:
           {{ expectedPrice }}
-          {{ token }}<br />
-          Expected fees: {{ fees[buyMarket] }}
+          {{ baseToken.toUpperCase() }}<br />
+          Expected fees: {{ fees[buyMarket] }} {{ baseToken.toUpperCase() }}
         </div>
         <!-- This button should be replace by connect wallet if the user isn't signed in for the transaction to take effect -->
         <!-- <q-btn
@@ -157,10 +158,13 @@ const focusAmount = () => {
   amountRef.value.focus();
 };
 
-const updateAmount = (v) =>
+const updateAmount = (event) => {
+  event.target.value = event.target.value.replace(/[^\d.]/g, '');
+  const v = event.target.value;
   Number.isNaN(parseInt(v))
     ? (amount.value = null)
     : (amount.value = parseInt(v));
+};
 
 watch(
   () => amountRef.value,
